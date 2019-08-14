@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-recommendationservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/recommendationservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-recommendationservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/recommendationservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/recommendationservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-recommendationservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-recommendationservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/recommendationservice:latest']
+  waitFor:
+    - 'build-recommendationservice'
+images:
+  - 'gcr.io/$PROJECT_ID/recommendationservice:latest'

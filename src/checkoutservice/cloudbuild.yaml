@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-checkoutservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/checkoutservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-checkoutservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/checkoutservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/checkoutservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-checkoutservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-checkoutservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/checkoutservice:latest']
+  waitFor:
+    - 'build-checkoutservice'
+images:
+  - 'gcr.io/$PROJECT_ID/checkoutservice:latest'

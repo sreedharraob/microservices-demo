@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-currencyservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/currencyservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-currencyservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/currencyservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/currencyservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-currencyservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-currencyservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/currencyservice:latest']
+  waitFor:
+    - 'build-currencyservice'
+images:
+  - 'gcr.io/$PROJECT_ID/currencyservice:latest'

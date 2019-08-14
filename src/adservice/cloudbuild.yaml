@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-adservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/adservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-adservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/adservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/adservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-adservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-adservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/adservice:latest']
+  waitFor:
+    - 'build-adservice'
+images:
+  - 'gcr.io/$PROJECT_ID/adservice:latest'

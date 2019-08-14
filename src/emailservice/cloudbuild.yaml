@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-emailservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/emailservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-emailservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/emailservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/emailservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-emailservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-emailservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/emailservice:latest']
+  waitFor:
+    - 'build-emailservice'
+images:
+  - 'gcr.io/$PROJECT_ID/emailservice:latest'

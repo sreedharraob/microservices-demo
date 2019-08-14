@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-paymentservice'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/paymentservice:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-paymentservice'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/paymentservice:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/paymentservice:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-paymentservice'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-paymentservice'
+  args: ['push', 'gcr.io/$PROJECT_ID/paymentservice:latest']
+  waitFor:
+    - 'build-paymentservice'
+images:
+  - 'gcr.io/$PROJECT_ID/paymentservice:latest'

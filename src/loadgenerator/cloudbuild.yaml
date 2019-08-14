@@ -1,0 +1,21 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'pull-loadgenerator'
+  entrypoint: 'bash'
+  args:
+   - '-c'
+   - |
+     docker pull gcr.io/$PROJECT_ID/loadgenerator:latest || exit 0
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-loadgenerator'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/loadgenerator:latest', '.', '--cache-from', 'gcr.io/$PROJECT_ID/loadgenerator:latest']
+  timeout: 600s
+  waitFor:
+    - 'pull-loadgenerator'
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-loadgenerator'
+  args: ['push', 'gcr.io/$PROJECT_ID/loadgenerator:latest']
+  waitFor:
+    - 'build-loadgenerator'
+images:
+  - 'gcr.io/$PROJECT_ID/loadgenerator:latest'
